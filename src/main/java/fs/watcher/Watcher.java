@@ -11,15 +11,15 @@ import static java.nio.file.StandardWatchEventKinds.*;
 
 public final class Watcher {
 
-    public static final int MAX_DIRECTORIES = 32;
+    public static final int MAX_NB_WATCHERS = 32;
 
     private final WatchService watchService;
-    private final ExecutorService directoryWatchers;
+    private final ExecutorService watchersPool;
     private final BlockingDeque<Event> eventQueue;
 
     public Watcher() throws Exception {
         watchService = FileSystems.getDefault().newWatchService();
-        directoryWatchers = Executors.newFixedThreadPool(MAX_DIRECTORIES);
+        watchersPool = Executors.newFixedThreadPool(MAX_NB_WATCHERS);
         eventQueue = new LinkedBlockingDeque<>();
     }
 
@@ -33,7 +33,7 @@ public final class Watcher {
             directory = path.getParent();
             filter = Optional.of(path.getFileName());
         }
-        directoryWatchers.submit(new DirectoryWatcher(directory, filter));
+        watchersPool.submit(new DirectoryWatcher(directory, filter));
     }
 
     public Event nextEvent() throws Exception {
