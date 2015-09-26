@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -23,34 +24,74 @@ public class WatcherTest {
         watcher = new Watcher();
     }
 
+    /**
+     * Given a watcher monitoring a directory
+     * When a new file is created in the directory
+     * Then it notifies a file creation event
+     */
     @Test(timeout = 1000)
-    public void it_sould_notify_a_file_creation() throws Exception {
-        Path directory = Files.createTempDirectory(getClass().getSimpleName());
+    public void test1() throws Exception {
+        Path directory = createTempDir();
         watch(directory);
-        Path newFile = Files.createTempFile(directory, "new", "");
+        Path newFile = createTempFile(directory);
         assertNextEvent(CREATE, newFile.toFile());
     }
 
+    /**
+     * Given a watcher monitoring a directory
+     * When an existing file is deleted in the directory
+     * Then it notifies a file deletion event
+     */
     @Test(timeout = 1000)
-    public void it_sould_notify_a_file_deletion() throws Exception {
-        Path directory = Files.createTempDirectory(getClass().getSimpleName());
-        Path newFile = Files.createTempFile(directory, "new", "");
+    public void test2() throws Exception {
+        Path directory = createTempDir();
+        Path newFile = createTempFile(directory);
         watch(directory);
         Files.delete(newFile);
         assertNextEvent(DELETE, newFile.toFile());
     }
 
+    /**
+     * Given a watcher monitoring a directory
+     * When an existing file is modified in the directory
+     * Then it notifies a file modification event
+     */
     @Test(timeout = 1000)
-    public void it_sould_notify_a_file_modification() throws Exception {
-        Path directory = Files.createTempDirectory(getClass().getSimpleName());
-        Path newFile = Files.createTempFile(directory, "new", "");
+    public void test3() throws Exception {
+        Path directory = createTempDir();
+        Path newFile = createTempFile(directory);
         watch(directory);
         FileUtils.touch(newFile.toFile());
         assertNextEvent(MODIFY, newFile.toFile());
     }
 
-    private void watch(Path directory) throws Exception {
-        watcher.watch(directory);
+    /**
+     * Given a watcher monitoring a file
+     * When the file is modified
+     * Then it notifies a file modification event
+     */
+    @Test(timeout = 1000)
+    public void test4() throws Exception {
+        Path newFile = createTempFile();
+        watch(newFile);
+        FileUtils.touch(newFile.toFile());
+        assertNextEvent(MODIFY, newFile.toFile());
+    }
+
+    private Path createTempDir() throws IOException {
+        return Files.createTempDirectory(getClass().getSimpleName());
+    }
+
+    private Path createTempFile() throws IOException {
+        return Files.createTempFile(createTempDir(), "new", "");
+    }
+
+    private Path createTempFile(Path directory) throws IOException {
+        return Files.createTempFile(directory, "new", "");
+    }
+
+    private void watch(Path path) throws Exception {
+        watcher.watch(path);
         Thread.sleep(50);
     }
 

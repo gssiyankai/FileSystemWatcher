@@ -1,6 +1,7 @@
 package fs.watcher;
 
 import java.nio.file.*;
+import java.util.Optional;
 import java.util.concurrent.*;
 
 import static fs.watcher.Event.EventType.CREATE;
@@ -22,8 +23,17 @@ public final class Watcher {
         eventQueue = new LinkedBlockingDeque<>();
     }
 
-    public void watch(Path directory) throws Exception {
-        directoryWatchers.submit(new DirectoryWatcher(directory));
+    public void watch(Path path) throws Exception {
+        Path directory;
+        Optional<Path> filter;
+        if (path.toFile().isDirectory()) {
+            directory = path;
+            filter = Optional.empty();
+        } else {
+            directory = path.getParent();
+            filter = Optional.of(path.getFileName());
+        }
+        directoryWatchers.submit(new DirectoryWatcher(directory, filter));
     }
 
     public Event nextEvent() throws Exception {
@@ -33,9 +43,11 @@ public final class Watcher {
     private class DirectoryWatcher implements Callable<Void> {
 
         private final Path directory;
+        private final Optional<Path> filter;
 
-        public DirectoryWatcher(Path directory) {
+        public DirectoryWatcher(Path directory, Optional<Path> filter) {
             this.directory = directory;
+            this.filter = filter;
         }
 
         @Override
@@ -45,7 +57,7 @@ public final class Watcher {
                 WatchKey key;
                 try {
                     key = watchService.take();
-                } catch (InterruptedException x) {
+                } catch (InterruptedException e) {
                     System.err.println("Watch interrupted");
                     break;
                 }
@@ -60,14 +72,19 @@ public final class Watcher {
                         eventType = CREATE;
                     } else if (kind == ENTRY_DELETE) {
                         eventType = DELETE;
-                    } else if(kind == ENTRY_MODIFY) {
+                    } else if (kind == ENTRY_MODIFY) {
                         eventType = MODIFY;
                     }
 
                     @SuppressWarnings("unchecked")
-                    WatchEvent<Path> ev = (WatchEvent<Path>)watchEvent;
-                    Path filename = ev.context();
+                    Path filename = ((WatchEvent<Path>) watchEvent).context();
                     Path child = directory.resolve(filename);
+
+                    if (filter.isPresent()) {
+                        if (!child.endsWith(filter.get())) {
+                            continue;
+                        }
+                    }
 
                     Event event = new Event(eventType, child);
                     System.out.println("Pushing event " + event);
