@@ -1,12 +1,15 @@
 package fs.watcher;
 
 import javax.inject.Singleton;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.nio.file.Paths;
+
+import static java.util.stream.Collectors.toList;
 
 @Singleton
 @Path("/")
@@ -18,13 +21,23 @@ public class WatcherService {
         watcher = new Watcher();
     }
 
+    @GET
+    @Path("/list")
+    public String list() {
+        synchronized (watcher) {
+            return String.join(";", watcher.items().stream().map(p -> p.toFile().getAbsolutePath()).collect(toList()));
+        }
+    }
+
     @POST
     @Path("/watch")
-    public Response watch(String path) throws Exception {
+    public boolean watch(String path) throws Exception {
         java.nio.file.Path p = Paths.get(path);
         if (p.toFile().exists()) {
-            watcher.watch(p);
-            return Response.ok().build();
+            synchronized (watcher) {
+                watcher.watch(p);
+            }
+            return true;
         } else {
             throw new FileNotFoundException(path);
         }

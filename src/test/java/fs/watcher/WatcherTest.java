@@ -8,10 +8,13 @@ import org.junit.Test;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.IntStream;
 
 import static fs.watcher.Event.EventType.*;
 import static fs.watcher.Helper.createTempDir;
 import static fs.watcher.Helper.createTempFile;
+import static java.util.stream.Collectors.toList;
 import static org.fest.assertions.Assertions.assertThat;
 
 public class WatcherTest {
@@ -77,9 +80,25 @@ public class WatcherTest {
         assertNextEvent(MODIFY, newFile.toFile());
     }
 
-    private void watch(Path path) throws Exception {
-        watcher.watch(path);
-        Thread.sleep(50);
+    /**
+     * Given a watcher
+     * When items are registered
+     * Then the watcher keeps track of them
+     */
+    @Test(timeout = 1000)
+    public void test5() throws Exception {
+        List<Path> newFiles = IntStream.range(0, 3).mapToObj(i -> createTempFile()).collect(toList());
+        newFiles.forEach(this::watch);
+        assertThat(watcher.items()).isEqualTo(newFiles);
+    }
+
+    private void watch(Path path) {
+        try {
+            watcher.watch(path);
+            Thread.sleep(50);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void assertNextEvent(EventType create, File expected) throws Exception {

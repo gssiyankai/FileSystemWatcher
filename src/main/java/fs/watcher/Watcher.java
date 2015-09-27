@@ -1,29 +1,36 @@
 package fs.watcher;
 
 import java.nio.file.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.*;
 
-import static fs.watcher.Event.EventType.CREATE;
-import static fs.watcher.Event.EventType.DELETE;
-import static fs.watcher.Event.EventType.MODIFY;
+import static fs.watcher.Event.EventType.*;
 import static java.nio.file.StandardWatchEventKinds.*;
 
-public final class Watcher {
+final class Watcher {
 
-    public static final int MAX_NB_WATCHERS = 32;
+    private static final int MAX_NB_WATCHERS = 32;
 
     private final WatchService watchService;
     private final ExecutorService watchersPool;
+    private final List<Path> items;
     private final BlockingDeque<Event> eventQueue;
 
     public Watcher() throws Exception {
         watchService = FileSystems.getDefault().newWatchService();
         watchersPool = Executors.newFixedThreadPool(MAX_NB_WATCHERS);
+        items = new ArrayList<>();
         eventQueue = new LinkedBlockingDeque<>();
     }
 
-    public void watch(Path path) throws Exception {
+    public List<Path> items() {
+        return items;
+    }
+
+    public void watch(Path path) {
+        items.add(path);
         Path directory;
         Optional<Path> filter;
         if (path.toFile().isDirectory()) {
