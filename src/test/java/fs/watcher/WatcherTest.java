@@ -6,13 +6,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static fs.watcher.Event.EventType.CREATE;
-import static fs.watcher.Event.EventType.DELETE;
-import static fs.watcher.Event.EventType.MODIFY;
+import static fs.watcher.Event.EventType.*;
+import static fs.watcher.Helper.createTempDir;
+import static fs.watcher.Helper.createTempFile;
 import static org.fest.assertions.Assertions.assertThat;
 
 public class WatcherTest {
@@ -76,18 +75,6 @@ public class WatcherTest {
         watch(newFile);
         FileUtils.touch(newFile.toFile());
         assertNextEvent(MODIFY, newFile.toFile());
-    }
-
-    private Path createTempDir() throws IOException {
-        return Files.createTempDirectory(getClass().getSimpleName());
-    }
-
-    private Path createTempFile() throws IOException {
-        return Files.createTempFile(createTempDir(), "new", "");
-    }
-
-    private Path createTempFile(Path directory) throws IOException {
-        return Files.createTempFile(directory, "new", "");
     }
 
     private void watch(Path path) throws Exception {
