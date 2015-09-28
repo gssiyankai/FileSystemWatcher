@@ -2,7 +2,7 @@
     position: relative;
     overflow: hidden;
     width:  100px;
-    height: 20px;
+    height: 30px;
 }
 .btn-file input[type=file] {
     position: absolute;
@@ -18,4 +18,7 @@
     background: white;
     cursor: inherit;
     display: block;
+}
+.input-path {
+    min-width: 75%;
 }

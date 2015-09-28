@@ -3,18 +3,20 @@
 <head>
 <title>File System Watcher</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css">
 <link rel="stylesheet" href="/css/styles.css">
-<script src="http://ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.0.js"></script>
-<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
-<script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js"></script>
 </head>
 <body>
-    <div class="navbar">
-        <div class="navbar-inner">
-            <a class="brand" href="#">File System Watcher</a>
-        </div>
-    </div>
+    <nav class="navbar navbar-default">
+        <nav class="navbar navbar-default">
+          <div class="container-fluid">
+            <a class="navbar-brand" href="#">File System Watcher</a>
+          </div>
+    </nav>
 
     <div id="main" class="container">
         <table class="table table-striped">
@@ -35,27 +37,32 @@
             </tr>
             <!-- /ko -->
         </table>
-        <button data-bind="click: beginAdd" class="btn">Add Item</button>
+        <button data-bind="click: beginAdd" class="btn btn-primary">Add Item</button>
     </div>
 
-    <div id="add" class="modal hide fade" tabindex="=1" role="dialog" aria-labelledby="addDialogLabel" aria-hidden="true">
-        <div class="modal-header">
-            <h3 id="addDialogLabel">Add Item</h3>
-        </div>
-        <div class="modal-body">
-            <form class="form-horizontal">
-                <div class="control-group">
-                    <label class="control-label" for="inputPath">Path</label>
-                    <div class="controls">
-                        <input data-bind="value: path" type="text" id="inputPath" style="width: 300px;">
-                    </div>
+    <div id="add" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Add item</h4>
                 </div>
-                <span class="btn btn-default btn-file">Browse...<input type="file"></span>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button data-bind="click: addItem" class="btn btn-primary">Add Item</button>
-            <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <div class="modal-body">
+                    <form class="form-horizontal">
+                        <div class="control-group">
+                            <div class="controls">
+                                <label class="control-label" for="inputPath">Path</label>
+                                <input class="input-path"  data-bind="value: path" type="text" id="inputPath">
+                                <span class="btn btn-default btn-file">Browse...<input type="file"></span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button data-bind="click: addItem" type="button" class="btn btn-primary">Confirm</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -75,6 +82,7 @@
                         cache: false,
                         dataType: 'json',
                         data: data,
+                        beforeSend: function() { alert("Loading...") },
                         error: function(jqXHR) {
                             console.log("ajax error " + jqXHR.status);
                         }
@@ -88,23 +96,23 @@
 
                 self.add = function(path) {
                     self.items.push({path: path});
-                    self.ajax(self.watchURI, 'POST', path);
                 }
             }
 
-            function AddItemViewModel() {
+            function AddItemViewModel(itemsViewModel) {
                 var self = this;
+                self.itemsViewModel = itemsViewModel;
                 self.path = ko.observable();
 
                 self.addItem = function() {
                     $('#add').modal('hide');
-                    itemsViewModel.add(self.path());
+                    self.itemsViewModel.add(self.path());
                     self.path("");
                 }
             }
 
             var itemsViewModel = new ItemsViewModel();
-            var addItemViewModel = new AddItemViewModel();
+            var addItemViewModel = new AddItemViewModel(itemsViewModel);
             ko.applyBindings(itemsViewModel, $('#main')[0]);
             ko.applyBindings(addItemViewModel, $('#add')[0]);
 
