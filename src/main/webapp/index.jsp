@@ -18,6 +18,35 @@
           </div>
     </nav>
 
+    <div id="credentials" class="container">
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label for="inputUsername" class="control-label col-xs-2">Username</label>
+                <div class="col-xs-5">
+                    <input type="username" class="form-control" id="inputUsername" placeholder="Username">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputPassword" class="control-label col-xs-2">Password</label>
+                <div class="col-xs-5">
+                    <input type="password" class="form-control" id="inputPassword" placeholder="Password">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-offset-2 col-xs-10">
+                    <div class="checkbox">
+                        <label><input type="checkbox" disabled="true"> Remember me</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-offset-2 col-xs-10">
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
     <div id="main" class="container">
         <table class="table table-striped">
             <tr></td><td><b>Item</b></td><td><b>Status</b></td><td><b>Options</b></td></tr>
