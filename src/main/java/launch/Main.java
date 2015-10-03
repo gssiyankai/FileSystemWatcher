@@ -6,11 +6,15 @@ import org.apache.tomcat.util.http.fileupload.IOUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public final class Main {
 
     private static final int PORT = 8443;
+    private static String WEBAPP_PATH;
 
     private Main() {
     }
@@ -20,9 +24,7 @@ public final class Main {
         tomcat.setConnector(httpsConnector());
         tomcat.getService().addConnector(tomcat.getConnector());
 
-        String webappDirLocation = "src/main/webapp/";
-        tomcat.addWebapp("/", new File(webappDirLocation).getAbsolutePath());
-        System.out.println("Configuring app with basedir: " + new File("./" + webappDirLocation).getAbsolutePath());
+        tomcat.addWebapp("/", webappPath());
 
         tomcat.start();
         tomcat.getServer().await();
@@ -43,9 +45,34 @@ public final class Main {
     }
 
     private static String keystoreFile() throws Exception {
-        File keystore = Files.createTempFile("keystore", "").toFile();
-        IOUtils.copy(Main.class.getResourceAsStream("/ssl/keystore"), new FileOutputStream(keystore));
-        return keystore.getAbsolutePath();
+        return Paths.get(webappPath(), "ssl", "keystore").toFile().getAbsolutePath();
+    }
+
+    private static String webappPath() throws IOException {
+        if(WEBAPP_PATH == null) {
+            WEBAPP_PATH = Files.createTempDirectory("FileSystemWatcher").toFile().getAbsolutePath();
+            copyWebappResource(WEBAPP_PATH, "index.jsp");
+            copyWebappResource(WEBAPP_PATH, "css", "styles.css");
+            copyWebappResource(WEBAPP_PATH, "ssl", "keystore");
+            copyWebappResource(WEBAPP_PATH, "WEB-INF", "web.xml");
+        }
+        return WEBAPP_PATH;
+    }
+
+    private static void copyWebappResource(String webapp, String folder, String resource) throws IOException {
+        Files.createDirectories(Paths.get(webapp, folder));
+        String resourcePath =folder + File.separator + resource;
+        copyWebappResource(webapp, resourcePath);
+    }
+
+    private static void copyWebappResource(String webapp, String resource) throws IOException {
+        IOUtils.copy(
+                resourceStream("/" + resource),
+                new FileOutputStream(Paths.get(webapp, resource).toFile()));
+    }
+
+    private static InputStream resourceStream(String path) {
+        return Main.class.getResourceAsStream(path);
     }
 
 }

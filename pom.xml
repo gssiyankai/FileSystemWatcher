@@ -10,7 +10,6 @@
     <name>File System Watcher</name>
 
     <build>
-        <finalName>${project.artifactId}</finalName>
         <resources>
             <resource>
                 <directory>src/main/webapp</directory>
@@ -31,7 +30,7 @@
                 <artifactId>appassembler-maven-plugin</artifactId>
                 <version>1.1.1</version>
                 <configuration>
-                    <assembleDirectory>target</assembleDirectory>
+                    <assembleDirectory>${project.build.directory}/${project.artifactId}</assembleDirectory>
                     <programs>
                         <program>
                             <mainClass>launch.Main</mainClass>
@@ -44,6 +43,24 @@
                         <phase>package</phase>
                         <goals>
                             <goal>assemble</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.5.5</version>
+                <configuration>
+                    <descriptor>assembly.xml</descriptor>
+                    <finalName>${project.artifactId}</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>
