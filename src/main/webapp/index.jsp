@@ -57,7 +57,6 @@
                 </td>
                 <td>
                     <span data-bind="visible: done" class="label label-success">Done</span>
-                    <span data-bind="visible: !done()" class="label label-important">In Progress</span>
                 </td>
                 <td>
                     <button data-bind="enable:false" class="btn">Suspend</button>
@@ -81,14 +80,14 @@
                         <div class="control-group">
                             <div class="controls">
                                 <label class="control-label" for="inputPath">Path</label>
-                                <input class="input-path"  data-bind="value: path" type="text" id="inputPath">
-                                <span class="btn btn-default btn-file">Browse...<input type="file"></span>
+                                <input class="input-path" type="text" id="inputPath" data-bind="value: inputPath">
+                                <span class="btn btn-default btn-file">Browse...<input type="file" data-bind="value: inputPath"></span>
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button data-bind="click: addItem" type="button" class="btn btn-primary">Confirm</button>
+                    <button data-bind="click: clickConfirm" class="btn btn-primary" data-dismiss="modal">Confirm</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
@@ -105,6 +104,7 @@
                 self.password = ko.observable("");
                 self.showMain = ko.observable(false);
                 self.items = ko.observableArray();
+                self.inputPath = ko.observable("");
 
                 self.ajax = function(uri, method, data) {
                     var request = {
@@ -131,7 +131,18 @@
                         .fail(function (jqXHR, status, error) {
                             alert(jqXHR.responseText);
                         });
-;
+                }
+
+                self.clickAddItem = function() {
+                    $('#add').modal('show');
+                }
+
+                self.clickConfirm = function() {
+                    self.items.push({
+                        path: ko.observable(self.inputPath()),
+                        done: ko.observable(true)
+                    });
+                    self.inputPath("");
                 }
             }
 
