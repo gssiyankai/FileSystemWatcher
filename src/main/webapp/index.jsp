@@ -18,18 +18,18 @@
           </div>
     </nav>
 
-    <div id="credentials" class="container">
+    <div id="credentials" class="container" data-bind="visible: showCredentials">
         <form class="form-horizontal">
             <div class="form-group">
                 <label for="inputUsername" class="control-label col-xs-2">Username</label>
                 <div class="col-xs-5">
-                    <input type="username" class="form-control" id="inputUsername" placeholder="Username">
+                    <input type="username" class="form-control" id="inputUsername" placeholder="Username" data-bind="value: username">
                 </div>
             </div>
             <div class="form-group">
                 <label for="inputPassword" class="control-label col-xs-2">Password</label>
                 <div class="col-xs-5">
-                    <input type="password" class="form-control" id="inputPassword" placeholder="Password">
+                    <input type="password" class="form-control" id="inputPassword" placeholder="Password" data-bind="value: password">
                 </div>
             </div>
             <div class="form-group">
@@ -41,13 +41,13 @@
             </div>
             <div class="form-group">
                 <div class="col-xs-offset-2 col-xs-10">
-                    <button type="submit" class="btn btn-primary">Login</button>
+                    <button type="submit" class="btn btn-primary" data-bind="click: clickLogin">Login</button>
                 </div>
             </div>
         </form>
     </div>
 
-    <div id="main" class="container">
+    <div id="main" class="container" data-bind="visible: showMain">
         <table class="table table-striped">
             <tr></td><td><b>Item</b></td><td><b>Status</b></td><td><b>Options</b></td></tr>
             <!-- ko foreach: items -->
@@ -66,7 +66,7 @@
             </tr>
             <!-- /ko -->
         </table>
-        <button data-bind="click: beginAdd" class="btn btn-primary">Add Item</button>
+        <button data-bind="click: clickAddItem" class="btn btn-primary">Add Item</button>
     </div>
 
     <div id="add" class="modal fade">
@@ -97,9 +97,13 @@
 
     <script type="text/javascript">
 
-            function ItemsViewModel() {
+            function ViewModel() {
                 var self = this;
-                self.watchURI = 'http://localhost:8080/rest/watch';
+                self.serverURI = 'https://localhost:8443/rest/';
+                self.showCredentials = ko.observable(true);
+                self.username = ko.observable("");
+                self.password = ko.observable("");
+                self.showMain = ko.observable(false);
                 self.items = ko.observableArray();
 
                 self.ajax = function(uri, method, data) {
@@ -111,7 +115,6 @@
                         cache: false,
                         dataType: 'json',
                         data: data,
-                        beforeSend: function() { alert("Loading...") },
                         error: function(jqXHR) {
                             console.log("ajax error " + jqXHR.status);
                         }
@@ -119,31 +122,20 @@
                     return $.ajax(request);
                 }
 
-                self.beginAdd = function() {
-                    $('#add').modal('show');
-                }
-
-                self.add = function(path) {
-                    self.items.push({path: path});
-                }
-            }
-
-            function AddItemViewModel(itemsViewModel) {
-                var self = this;
-                self.itemsViewModel = itemsViewModel;
-                self.path = ko.observable();
-
-                self.addItem = function() {
-                    $('#add').modal('hide');
-                    self.itemsViewModel.add(self.path());
-                    self.path("");
+                self.clickLogin = function() {
+                    self.ajax(self.serverURI + 'login', 'POST', self.username() + ':' + self.password())
+                        .done(function(data) {
+                            self.showCredentials(false);
+                            self.showMain(true);
+                        })
+                        .fail(function (jqXHR, status, error) {
+                            alert(jqXHR.responseText);
+                        });
+;
                 }
             }
 
-            var itemsViewModel = new ItemsViewModel();
-            var addItemViewModel = new AddItemViewModel(itemsViewModel);
-            ko.applyBindings(itemsViewModel, $('#main')[0]);
-            ko.applyBindings(addItemViewModel, $('#add')[0]);
+            ko.applyBindings(new ViewModel());
 
     </script>
 </body>

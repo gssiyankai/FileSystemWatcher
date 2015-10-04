@@ -1,10 +1,7 @@
 package fs.watcher;
 
 import javax.inject.Singleton;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.nio.file.Paths;
@@ -16,9 +13,20 @@ import static java.util.stream.Collectors.toList;
 public class WatcherService {
 
     private final Watcher watcher;
+    private String username;
+    private String password;
 
     public WatcherService() throws Exception {
         watcher = new Watcher();
+    }
+
+    @POST
+    @Path("/login")
+    public boolean login(String credentials) {
+        int separatorIndex = credentials.indexOf(":");
+        this.username = credentials.substring(0, separatorIndex);
+        this.password = credentials.substring(separatorIndex+1);
+        return true;
     }
 
     @GET
