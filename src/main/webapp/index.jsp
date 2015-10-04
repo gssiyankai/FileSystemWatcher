@@ -81,7 +81,7 @@
                             <div class="controls">
                                 <label class="control-label" for="inputPath">Path</label>
                                 <input class="input-path" type="text" id="inputPath" data-bind="value: inputPath">
-                                <span class="btn btn-default btn-file">Browse...<input type="file" data-bind="value: inputPath"></span>
+                                <span class="btn btn-default btn-file">Browse...<input disabled="disabled" type="file" data-bind="value: inputPath"></span>
                             </div>
                         </div>
                     </form>
@@ -138,11 +138,17 @@
                 }
 
                 self.clickConfirm = function() {
-                    self.items.push({
-                        path: ko.observable(self.inputPath()),
-                        done: ko.observable(true)
-                    });
-                    self.inputPath("");
+                    self.ajax(self.serverURI + 'watch', 'POST', self.inputPath())
+                        .done(function(data) {
+                            self.items.push({
+                                path: ko.observable(self.inputPath()),
+                                done: ko.observable(true)
+                            });
+                            self.inputPath("");
+                        })
+                        .fail(function (jqXHR, status, error) {
+                            alert(jqXHR.responseText);
+                        });
                 }
             }
 
