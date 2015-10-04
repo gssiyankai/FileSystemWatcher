@@ -4,7 +4,6 @@ import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,7 +60,7 @@ public final class Main {
 
     private static void copyWebappResource(String webapp, String folder, String resource) throws IOException {
         Files.createDirectories(Paths.get(webapp, folder));
-        String resourcePath =folder + File.separator + resource;
+        String resourcePath = folder + '/' + resource;
         copyWebappResource(webapp, resourcePath);
     }
 
