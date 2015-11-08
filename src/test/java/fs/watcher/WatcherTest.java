@@ -2,6 +2,7 @@ package fs.watcher;
 
 import fs.watcher.Event.EventType;
 import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,6 +10,8 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.stream.IntStream;
 
 import static fs.watcher.Event.EventType.*;
@@ -21,10 +24,18 @@ import static org.fest.assertions.Assertions.assertThat;
 public class WatcherTest {
 
     private Watcher watcher;
+    private BlockingDeque<Event> events;
 
     @Before
     public void setup() throws Exception {
-        watcher = new Watcher();
+        watcher = Watcher.singleton();
+        events = new LinkedBlockingDeque<>();
+        watcher.registerChangeListener((eventType, path) -> events.add(new Event(eventType, path)));
+    }
+
+    @After
+    public void tearDown() {
+        Watcher.reset();
     }
 
     /**
@@ -113,10 +124,10 @@ public class WatcherTest {
         }
     }
 
-    private void assertNextEvent(EventType create, File expected) throws Exception {
-        Event event = watcher.nextEvent();
+    private void assertNextEvent(EventType type, File expected) throws Exception {
+        Event event = events.take();
         assertThat(event).isNotNull();
-        assertThat(event.type()).isEqualTo(create);
+        assertThat(event.type()).isEqualTo(type);
         assertThat(event.path().toFile()).isEqualTo(expected);
     }
 

@@ -13,23 +13,46 @@ final class Watcher {
 
     static final int MAX_NB_WATCHERS = 32;
 
+    private static Watcher INSTANCE;
+
     private final WatchService watchService;
     private final ExecutorService watchersPool;
     private final List<Path> items;
-    private final BlockingDeque<Event> eventQueue;
+    private final List<ItemListener> itemListeners;
+    private final List<ChangeListener> changeListeners;
 
-    public Watcher() throws Exception {
+    private Watcher() throws Exception {
         watchService = FileSystems.getDefault().newWatchService();
         watchersPool = Executors.newFixedThreadPool(MAX_NB_WATCHERS);
         items = new ArrayList<>();
-        eventQueue = new LinkedBlockingDeque<>();
+        itemListeners = new ArrayList<>();
+        changeListeners = new ArrayList<>();
+    }
+
+    static Watcher singleton() throws Exception {
+        if(INSTANCE == null) {
+            INSTANCE = new Watcher();
+        }
+        return INSTANCE;
+    }
+
+    static void reset() {
+        INSTANCE = null;
+    }
+
+    public void registerItemListener(ItemListener listener) {
+        itemListeners.add(listener);
+    }
+
+    public void registerChangeListener(ChangeListener listener) {
+        changeListeners.add(listener);
     }
 
     public List<Path> items() {
         return items;
     }
 
-    public void watch(Path path) {
+    public void watch(Path path) throws Exception {
         if(items.size() >= MAX_NB_WATCHERS) {
             throw new RuntimeException("Number of watchers exceeded");
         }
@@ -44,10 +67,9 @@ final class Watcher {
             filter = Optional.of(path.getFileName());
         }
         watchersPool.submit(new DirectoryWatcher(directory, filter));
-    }
-
-    public Event nextEvent() throws Exception {
-        return eventQueue.take();
+        for (ItemListener listener : itemListeners) {
+            listener.onInsertion(path);
+        }
     }
 
     private class DirectoryWatcher implements Callable<Void> {
@@ -98,7 +120,9 @@ final class Watcher {
 
                     Event event = new Event(eventType, child);
                     System.out.println("Pushing event " + event);
-                    eventQueue.push(event);
+                    for (ChangeListener listener : changeListeners) {
+                        listener.onChange(eventType, child);
+                    }
                 }
 
                 boolean valid = key.reset();

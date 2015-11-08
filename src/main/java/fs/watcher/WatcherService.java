@@ -17,7 +17,7 @@ public class WatcherService {
     private String password;
 
     public WatcherService() throws Exception {
-        watcher = new Watcher();
+        watcher = Watcher.singleton();
     }
 
     @POST

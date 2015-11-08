@@ -2,6 +2,7 @@ package fs.watcher;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
+import org.junit.After;
 import org.junit.Test;
 
 import javax.ws.rs.client.Entity;
@@ -19,6 +20,12 @@ public class WatcherServiceTest extends JerseyTest {
     @Override
     protected Application configure() {
         return new ResourceConfig(WatcherService.class);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        Watcher.reset();
+        super.tearDown();
     }
 
     /**
