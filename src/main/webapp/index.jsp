@@ -49,12 +49,12 @@
 
     <div id="main" class="container" data-bind="visible: showMain">
         <ul class="nav nav-tabs">
-          <li class="active"><a href="#configure" data-toggle="pill">Configure</a></li>
+          <li class="active"><a href="#configuration" data-toggle="pill">Configuration</a></li>
           <li><a href="#logs" data-toggle="pill">Logs</a></li>
         </ul>
 
         <div id='content' class="tab-content">
-          <div class="tab-pane active" id="configure">
+          <div class="tab-pane active" id="configuration">
             <table class="table table-striped">
                 <tr></td><td><b>Item</b></td><td><b>Status</b></td><td><b>Options</b></td></tr>
                 <!-- ko foreach: items -->
