@@ -1,10 +1,7 @@
 package fs.watcher;
 
-import fs.watcher.Event.EventType;
-
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
-import java.nio.file.Path;
 
 @ServerEndpoint(value = "/websocket/changes/notify")
 public class ChangeNotifier implements ChangeListener {
@@ -35,7 +32,7 @@ public class ChangeNotifier implements ChangeListener {
     }
 
     @Override
-    public void onChange(EventType eventType, Path path) throws Exception {
+    public void onChange(Long time, Event event) throws Exception {
 
     }
 

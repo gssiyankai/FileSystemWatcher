@@ -30,7 +30,7 @@ public class WatcherTest {
     public void setup() throws Exception {
         watcher = Watcher.singleton();
         events = new LinkedBlockingDeque<>();
-        watcher.registerChangeListener((eventType, path) -> events.add(new Event(eventType, path)));
+        watcher.registerChangeListener((time, event) -> events.add(event));
     }
 
     @After

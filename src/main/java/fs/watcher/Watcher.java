@@ -4,7 +4,9 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static fs.watcher.Event.EventType.*;
 import static java.nio.file.StandardWatchEventKinds.*;
@@ -118,10 +120,11 @@ final class Watcher {
                         }
                     }
 
+                    Long time = System.currentTimeMillis();
                     Event event = new Event(eventType, child);
                     System.out.println("Pushing event " + event);
                     for (ChangeListener listener : changeListeners) {
-                        listener.onChange(eventType, child);
+                        listener.onChange(time, event);
                     }
                 }
 
