@@ -14,6 +14,7 @@ import java.util.stream.IntStream;
 import static fs.watcher.Event.EventType.*;
 import static fs.watcher.Helper.createTempDir;
 import static fs.watcher.Helper.createTempFile;
+import static fs.watcher.Watcher.MAX_NB_WATCHERS;
 import static java.util.stream.Collectors.toList;
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -90,6 +91,17 @@ public class WatcherTest {
         List<Path> newFiles = IntStream.range(0, 3).mapToObj(i -> createTempFile()).collect(toList());
         newFiles.forEach(this::watch);
         assertThat(watcher.items()).isEqualTo(newFiles);
+    }
+
+    /**
+     * Given a watcher
+     * When more items than MAX_NB_WATCHERS are registered
+     * Then there is an explicit exception thrown
+     */
+    @Test(expected = RuntimeException.class)
+    public void test6() throws Exception {
+        List<Path> newFiles = IntStream.range(0, MAX_NB_WATCHERS+1).mapToObj(i -> createTempFile()).collect(toList());
+        newFiles.forEach(this::watch);
     }
 
     private void watch(Path path) {

@@ -11,7 +11,7 @@ import static java.nio.file.StandardWatchEventKinds.*;
 
 final class Watcher {
 
-    private static final int MAX_NB_WATCHERS = 32;
+    static final int MAX_NB_WATCHERS = 32;
 
     private final WatchService watchService;
     private final ExecutorService watchersPool;
@@ -30,6 +30,9 @@ final class Watcher {
     }
 
     public void watch(Path path) {
+        if(items.size() >= MAX_NB_WATCHERS) {
+            throw new RuntimeException("Number of watchers exceeded");
+        }
         items.add(path);
         Path directory;
         Optional<Path> filter;
