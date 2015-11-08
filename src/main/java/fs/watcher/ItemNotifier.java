@@ -3,6 +3,7 @@ package fs.watcher;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.nio.file.Path;
+import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
@@ -21,14 +22,17 @@ public class ItemNotifier implements ItemListener {
     public void start(Session session) throws Exception {
         this.session = session;
         synchronized (watcher) {
-            this.session
-                    .getBasicRemote()
-                    .sendText(
-                            String.join(";",
-                                    watcher.items().
-                                            stream().
-                                            map(p -> p.toFile().getAbsolutePath())
-                                            .collect(toList())));
+            List<Path> items = watcher.items();
+            if(items.size() > 0) {
+                this.session
+                        .getBasicRemote()
+                        .sendText(
+                                String.join(";",
+                                        items.
+                                                stream().
+                                                map(p -> p.toFile().getAbsolutePath())
+                                                .collect(toList())));
+            }
         }
     }
 

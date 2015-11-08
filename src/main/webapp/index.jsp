@@ -56,7 +56,7 @@
                     <p data-bind="text: path"></p>
                 </td>
                 <td>
-                    <span data-bind="visible: done" class="label label-success">Done</span>
+                    <span data-bind="visible: done" class="label label-success">Watching</span>
                 </td>
                 <td>
                     <button data-bind="enable:false" class="btn">Suspend</button>
@@ -98,13 +98,16 @@
 
             function ViewModel() {
                 var self = this;
-                self.serverURI = 'https://localhost:8443/rest/';
+                self.restServerURI = 'https://localhost:8443/rest/';
                 self.showCredentials = ko.observable(true);
                 self.username = ko.observable("");
                 self.password = ko.observable("");
                 self.showMain = ko.observable(false);
                 self.items = ko.observableArray();
                 self.inputPath = ko.observable("");
+
+                self.websocket;
+                self.websocketURI = 'wss://' + window.location.host + '/websocket/items/notify';
 
                 self.ajax = function(uri, method, data) {
                     var request = {
@@ -123,10 +126,11 @@
                 }
 
                 self.clickLogin = function() {
-                    self.ajax(self.serverURI + 'login', 'POST', self.username() + ':' + self.password())
+                    self.ajax(self.restServerURI + 'login', 'POST', self.username() + ':' + self.password())
                         .done(function(data) {
                             self.showCredentials(false);
                             self.showMain(true);
+                            self.listenItems();
                         })
                         .fail(function (jqXHR, status, error) {
                             alert(jqXHR.responseText);
@@ -138,17 +142,40 @@
                 }
 
                 self.clickConfirm = function() {
-                    self.ajax(self.serverURI + 'watch', 'POST', self.inputPath())
-                        .done(function(data) {
-                            self.items.push({
-                                path: ko.observable(self.inputPath()),
-                                done: ko.observable(true)
-                            });
+                    self.ajax(self.restServerURI + 'watch', 'POST', self.inputPath())
+                        .done(function() {
                             self.inputPath("");
                         })
                         .fail(function (jqXHR, status, error) {
                             alert(jqXHR.responseText);
                         });
+                }
+
+                self.listenItems = function() {
+                    if ('WebSocket' in window) {
+                        self.websocket = new WebSocket(self.websocketURI);
+                    } else if ('MozWebSocket' in window) {
+                        self.websocket = new MozWebSocket(self.websocketURI);
+                    } else {
+                        alert('WebSocket is not supported by this browser.');
+                        return;
+                    }
+                    self.websocket.onopen = function(event) {
+                        display('Connected to server.');
+                    };
+
+                    self.websocket.onclose = function() {
+                       display('Disconnected from server');
+                    };
+                    self.websocket.onmessage = function(event) {
+                        paths = event.data.split(";");
+                        for(var i = 0; i < paths.length; ++i) {
+                            self.items.push({
+                                path: ko.observable(paths[i]),
+                                done: ko.observable(true)
+                            });
+                        }
+                    };
                 }
             }
 
