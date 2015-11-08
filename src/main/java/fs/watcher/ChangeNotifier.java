@@ -38,7 +38,14 @@ public final class ChangeNotifier implements ChangeListener {
                 String.join(";",
                         DateFormat.getInstance().format(time),
                         event.type().name(),
-                        event.path().toFile().getAbsolutePath()));
+                        event.path().toFile().getAbsolutePath(),
+                        "pending"));
+        session.getBasicRemote().sendText(
+                String.join(";",
+                        DateFormat.getInstance().format(time),
+                        event.type().name(),
+                        event.path().toFile().getAbsolutePath(),
+                        "done"));
     }
 
 }

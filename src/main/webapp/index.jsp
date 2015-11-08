@@ -89,7 +89,16 @@
                          <p data-bind="text: path"></p>
                      </td>
                      <td>
-                         <p data-bind="text: status"></p>
+                         <div class="progress" data-bind="visible: pending">
+                           <div class="progress-bar progress-bar-warning progress-bar-striped active" role="progressbar" style="width: 100%">
+                             <span class="sr-only">100% Complete</span>
+                           </div>
+                         </div>
+                         <div class="progress" data-bind="visible: done">
+                            <div class="progress-bar progress-bar-success" role="progressbar" style="width: 100%">
+                              <span class="sr-only">100% Complete</span>
+                            </div>
+                          </div>
                      </td>
                  </tr>
                  <!-- /ko -->
@@ -230,12 +239,24 @@
                     };
                     self.changesWebsocket.onmessage = function(event) {
                         data = event.data.split(";");
-                        self.events.unshift({
-                            time: ko.observable(data[0]),
-                            event: ko.observable(data[1]),
-                            path: ko.observable(data[2]),
-                            status: ko.observable("done")
-                        });
+                        if(data[3] == "done") {
+                            self.events.shift();
+                            self.events.unshift({
+                                time: ko.observable(data[0]),
+                                event: ko.observable(data[1]),
+                                path: ko.observable(data[2]),
+                                pending: ko.observable(false),
+                                done: ko.observable(true)
+                            });
+                        } else {
+                            self.events.unshift({
+                                time: ko.observable(data[0]),
+                                event: ko.observable(data[1]),
+                                path: ko.observable(data[2]),
+                                pending: ko.observable(true),
+                                done: ko.observable(false)
+                            });
+                        }
                     };
                 }
             }
