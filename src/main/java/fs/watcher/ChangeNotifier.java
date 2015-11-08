@@ -2,9 +2,10 @@ package fs.watcher;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
+import java.text.DateFormat;
 
 @ServerEndpoint(value = "/websocket/changes/notify")
-public class ChangeNotifier implements ChangeListener {
+public final class ChangeNotifier implements ChangeListener {
 
     private final Watcher watcher;
     private Session session;
@@ -33,7 +34,11 @@ public class ChangeNotifier implements ChangeListener {
 
     @Override
     public void onChange(Long time, Event event) throws Exception {
-
+        session.getBasicRemote().sendText(
+                String.join(";",
+                        DateFormat.getInstance().format(time),
+                        event.type().name(),
+                        event.path().toFile().getAbsolutePath()));
     }
 
 }

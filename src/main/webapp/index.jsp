@@ -135,11 +135,13 @@
                 self.showMain = ko.observable(false);
                 self.items = ko.observableArray();
                 self.inputPath = ko.observable("");
-
-                self.websocket;
-                self.websocketURI = 'wss://' + window.location.host + '/websocket/items/notify';
-
                 self.events = ko.observableArray();
+
+                self.itemsWebsocket;
+                self.itemsWebsocketURI = 'wss://' + window.location.host + '/websocket/items/notify';
+
+                self.changesWebsocket;
+                self.changesWebsocketURI = 'wss://' + window.location.host + '/websocket/changes/notify';
 
                 self.ajax = function(uri, method, data) {
                     var request = {
@@ -163,6 +165,7 @@
                             self.showCredentials(false);
                             self.showMain(true);
                             self.listenItems();
+                            self.listenChanges();
                         })
                         .fail(function (jqXHR, status, error) {
                             alert(jqXHR.responseText);
@@ -185,21 +188,20 @@
 
                 self.listenItems = function() {
                     if ('WebSocket' in window) {
-                        self.websocket = new WebSocket(self.websocketURI);
+                        self.itemsWebsocket = new WebSocket(self.itemsWebsocketURI);
                     } else if ('MozWebSocket' in window) {
-                        self.websocket = new MozWebSocket(self.websocketURI);
+                        self.itemsWebsocket = new MozWebSocket(self.itemsWebsocketURI);
                     } else {
                         alert('WebSocket is not supported by this browser.');
                         return;
                     }
-                    self.websocket.onopen = function(event) {
+                    self.itemsWebsocket.onopen = function(event) {
                         display('Connected to server.');
                     };
-
-                    self.websocket.onclose = function() {
+                    self.itemsWebsocket.onclose = function() {
                        display('Disconnected from server');
                     };
-                    self.websocket.onmessage = function(event) {
+                    self.itemsWebsocket.onmessage = function(event) {
                         paths = event.data.split(";");
                         for(var i = 0; i < paths.length; ++i) {
                             self.items.push({
@@ -207,6 +209,33 @@
                                 done: ko.observable(true)
                             });
                         }
+                    };
+                }
+
+                self.listenChanges = function() {
+                    if ('WebSocket' in window) {
+                        self.changesWebsocket = new WebSocket(self.changesWebsocketURI);
+                    } else if ('MozWebSocket' in window) {
+                        self.changesWebsocket = new MozWebSocket(self.changesWebsocketURI);
+                    } else {
+                        alert('WebSocket is not supported by this browser.');
+                        return;
+                    }
+                    self.changesWebsocket.onopen = function(event) {
+                        display('Connected to server.');
+                    };
+
+                    self.changesWebsocket.onclose = function() {
+                       display('Disconnected from server');
+                    };
+                    self.changesWebsocket.onmessage = function(event) {
+                        data = event.data.split(";");
+                        self.events.unshift({
+                            time: ko.observable(data[0]),
+                            event: ko.observable(data[1]),
+                            path: ko.observable(data[2]),
+                            status: ko.observable("done")
+                        });
                     };
                 }
             }

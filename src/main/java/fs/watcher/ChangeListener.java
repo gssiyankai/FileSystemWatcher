@@ -1,6 +1,6 @@
 package fs.watcher;
 
-public interface ChangeListener {
+interface ChangeListener {
 
     void onChange(Long time, Event event) throws Exception;
 

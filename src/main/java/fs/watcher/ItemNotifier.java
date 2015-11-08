@@ -8,7 +8,7 @@ import java.util.List;
 import static java.util.stream.Collectors.toList;
 
 @ServerEndpoint(value = "/websocket/items/notify")
-public class ItemNotifier implements ItemListener {
+public final class ItemNotifier implements ItemListener {
 
     private final Watcher watcher;
     private Session session;
