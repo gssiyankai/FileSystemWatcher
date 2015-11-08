@@ -23,7 +23,7 @@ public final class Main {
         tomcat.setConnector(httpsConnector());
         tomcat.getService().addConnector(tomcat.getConnector());
 
-        tomcat.addWebapp("/", webappPath());
+        tomcat.addWebapp("", webappPath());
 
         tomcat.start();
         tomcat.getServer().await();
