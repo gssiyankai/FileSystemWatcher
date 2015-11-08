@@ -48,24 +48,54 @@
     </div>
 
     <div id="main" class="container" data-bind="visible: showMain">
-        <table class="table table-striped">
-            <tr></td><td><b>Item</b></td><td><b>Status</b></td><td><b>Options</b></td></tr>
-            <!-- ko foreach: items -->
-            <tr>
-                <td>
-                    <p data-bind="text: path"></p>
-                </td>
-                <td>
-                    <span data-bind="visible: done" class="label label-success">Watching</span>
-                </td>
-                <td>
-                    <button data-bind="enable:false" class="btn">Suspend</button>
-                    <button data-bind="enable:false" class="btn">Remove</button>
-                </td>
-            </tr>
-            <!-- /ko -->
-        </table>
-        <button data-bind="click: clickAddItem" class="btn btn-primary">Add Item</button>
+        <ul class="nav nav-tabs">
+          <li class="active"><a href="#configure" data-toggle="pill">Configure</a></li>
+          <li><a href="#logs" data-toggle="pill">Logs</a></li>
+        </ul>
+
+        <div id='content' class="tab-content">
+          <div class="tab-pane active" id="configure">
+            <table class="table table-striped">
+                <tr></td><td><b>Item</b></td><td><b>Status</b></td><td><b>Options</b></td></tr>
+                <!-- ko foreach: items -->
+                <tr>
+                    <td>
+                        <p data-bind="text: path"></p>
+                    </td>
+                    <td>
+                        <span data-bind="visible: done" class="label label-success">Watching</span>
+                    </td>
+                    <td>
+                        <button data-bind="enable:false" class="btn">Suspend</button>
+                        <button data-bind="enable:false" class="btn">Remove</button>
+                    </td>
+                </tr>
+                <!-- /ko -->
+            </table>
+            <button data-bind="click: clickAddItem" class="btn btn-primary">Add Item</button>
+          </div>
+          <div class="tab-pane" id="logs">
+            <table class="table table-striped">
+                 <tr></td><td><b>Time</b></td></td><td><b>Event</b></td></td><td><b>Path</b></td><td><b>Status</b></td></tr>
+                 <!-- ko foreach: events -->
+                 <tr>
+                     <td>
+                         <p data-bind="text: time"></p>
+                     </td>
+                     <td>
+                         <p data-bind="text: event"></p>
+                     </td>
+                     <td>
+                         <p data-bind="text: path"></p>
+                     </td>
+                     <td>
+                         <p data-bind="text: status"></p>
+                     </td>
+                 </tr>
+                 <!-- /ko -->
+             </table>
+          </div>
+        </div>
     </div>
 
     <div id="add" class="modal fade">
@@ -108,6 +138,8 @@
 
                 self.websocket;
                 self.websocketURI = 'wss://' + window.location.host + '/websocket/items/notify';
+
+                self.events = ko.observableArray();
 
                 self.ajax = function(uri, method, data) {
                     var request = {
