@@ -71,7 +71,7 @@
     <properties>
         <jersey2.version>2.19</jersey2.version>
         <jaxrs.version>2.0.1</jaxrs.version>
-        <tomcat.version>7.0.57</tomcat.version>
+        <tomcat.version>8.0.28</tomcat.version>
     </properties>
 
     <dependencies>
